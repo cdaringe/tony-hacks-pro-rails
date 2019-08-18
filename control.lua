@@ -8,8 +8,6 @@ function maybe_grind(player)
   if rail_standing_on == nil then return on_ungrind() end
   local next_rail = pro_rails.get_next_rail(rail_standing_on, player.walking_state.direction)
   if next_rail == nil then return on_ungrind() end
-  player.print('wat')
-  player.print(tostring(next_rail))
   player.teleport(next_rail.position)
   previous_next_rail = next_rail
 end
