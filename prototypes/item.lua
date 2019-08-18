@@ -4,7 +4,7 @@ data:extend({
     name = "skateboard",
     icon = "__THPR__/graphics/icon/skateboard_large.png",
     icon_size = 850,
-    flags = {"goes-to-main-inventory"},
+    -- flags = {"goes-to-main-inventory"},
     subgroup = "gun",
     order = "-a[military]",
     attack_parameters =
@@ -26,7 +26,7 @@ data:extend({
     name = "skateboard-wheel",
     icon = "__THPR__/graphics/icon/wheel_small.png",
     icon_size = 128,
-    flags = {"goes-to-main-inventory"},
+    -- flags = {"goes-to-main-inventory"},
     ammo_type =
     {
       category = "skate-ammo",
