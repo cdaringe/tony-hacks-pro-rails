@@ -1,6 +1,41 @@
-local util = {}
+local function is_not_nil(v)
+  return v ~= nil
+end
 
-function format_any_value(obj, buffer)
+local function map(func, array)
+  local new_array = {}
+  for i,v in ipairs(array) do
+    new_array[i] = func(v)
+  end
+  return new_array
+end
+
+local function find(func, array)
+  for i,v in ipairs(array) do
+    if func(v) then return v end
+  end
+end
+
+local function some(func, array)
+  for i,v in ipairs(array) do
+    if func(v) then return true end
+  end
+  return false
+end
+
+local function filter(func, array)
+  local new_array = {}
+  local i = 1
+  for _,v in ipairs(array) do
+    if func(v) then
+      new_array[i] = v
+      i = i + 1
+    end
+  end
+  return new_array
+end
+
+local function format_any_value(obj, buffer)
   local _type = type(obj)
   if _type == "table" then
       buffer[#buffer + 1] = '{"'
@@ -19,7 +54,7 @@ function format_any_value(obj, buffer)
   end
 end
 
-function to_json(obj)
+local function to_json(obj)
   if obj == nil then return "null" else
       local buffer = {}
       format_any_value(obj, buffer)
@@ -27,41 +62,13 @@ function to_json(obj)
   end
 end
 
-function is_not_nil(v)
-  return v ~= nil
-end
+return {
+  filter = filter,
+  find = find,
+  is_not_nil = is_not_nil,
+  map = map,
+  some = some,
+  to_json = to_json
+}
 
-function map(func, array)
-  local new_array = {}
-  for i,v in ipairs(array) do
-    new_array[i] = func(v)
-  end
-  return new_array
-end
 
-function find(func, array)
-  for i,v in ipairs(array) do
-    if func(v) then return v end
-  end
-end
-
-function some(func, array)
-  for i,v in ipairs(array) do
-    if func(v) then return true end
-  end
-  return false
-end
-
-function filter(func, array)
-  local new_array = {}
-  local i = 1
-  for _,v in ipairs(array) do
-    if func(v) then
-      new_array[i] = v
-      i = i + 1
-    end
-  end
-  return new_array
-end
-
-return util

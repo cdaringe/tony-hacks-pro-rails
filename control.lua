@@ -1,16 +1,15 @@
-require('src.util')
-require('src.map')
+local pro_rails = require('src/pro_rails')
 
 local is_grinding = true
 local previous_next_rail = nil
 
 function maybe_grind(player)
-  local rail_entity_standing_on = get_rail_standing_on(player)
-  if rail_entity_standing_on == nil then return on_ungrind() end
-  local next_rail = get_next_rail(rail_entity_standing_on, player.walking_state.direction)
-  if next_rail == nil then
-    return on_ungrind()
-  end
+  local rail_standing_on = pro_rails.get_rail_standing_on(player)
+  if rail_standing_on == nil then return on_ungrind() end
+  local next_rail = pro_rails.get_next_rail(rail_standing_on, player.walking_state.direction)
+  if next_rail == nil then return on_ungrind() end
+  player.print('wat')
+  player.print(tostring(next_rail))
   player.teleport(next_rail.position)
   previous_next_rail = next_rail
 end
@@ -21,10 +20,15 @@ end
 
 function on_player_changed_position(evt)
   local player = game.players[evt.player_index]
+  -- maybe_grind(player)
+  -- player.print('maybe-grind?')
   local status, err = pcall(function () maybe_grind(player) end)
-  if is_not_nill(err) then
-    print(status)
-    print(err.code)
+  -- player.print(status)
+  if err then
+    -- player.print('STATUS:')
+    -- player.print(status)
+    player.print('ERROR:')
+    player.print(err)
   end
 end
 
