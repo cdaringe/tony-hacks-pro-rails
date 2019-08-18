@@ -9,12 +9,13 @@
     "npm-run-all": "^4.1.2"
   },
   "scripts": {
-    "copy": "export VERSION=$(cat info.json | jq -r .version) && rsync -r --exclude node_modules $PWD/ ~/Library/Application\\ Support/factorio/mods/THPR_$VERSION/",
-    "watch": "chokidar '**/*.lua' '**/*.json' -c 'npm run copy'",
-    "prebuild": "rm -rf build && export VERSION=$(cat info.json | jq -r .version) && mkdir -p build/THPR_$VERSION",
-    "bundle": "export VERSION=$(cat info.json | jq -r .version) && cp -r *.lua info.json graphics locale prototypes build/THPR_$VERSION && cd build && zip -r THPR_$VERSION.zip THPR_$VERSION",
     "build": "run-s bundle",
-    "deploy": "rm -rf ~/Library/Application\\ Support/factorio/mods/THPR* && export VERSION=$(cat info.json | jq -r .version) && cp build/THPR_$VERSION.zip ~/Library/Application\\ Support/factorio/mods/"
+    "bundle": "export VERSION=$(cat info.json | jq -r .version) && cp -r *.lua info.json graphics locale prototypes build/THPR_$VERSION && cd build && zip -r THPR_$VERSION.zip THPR_$VERSION",
+    "copy": "export VERSION=$(cat info.json | jq -r .version) && rsync -r --exclude node_modules $PWD/ ~/Library/Application\\ Support/factorio/mods/THPR_$VERSION/",
+    "deploy": "rm -rf ~/Library/Application\\ Support/factorio/mods/THPR* && export VERSION=$(cat info.json | jq -r .version) && cp build/THPR_$VERSION.zip ~/Library/Application\\ Support/factorio/mods/",
+    "prebuild": "rm -rf build && export VERSION=$(cat info.json | jq -r .version) && mkdir -p build/THPR_$VERSION",
+    "test": "lua test/util.test.lua",
+    "watch": "chokidar '**/*.lua' '**/*.json' -c 'npm run copy'"
   },
   "dependencies": {}
 }
