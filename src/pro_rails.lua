@@ -4,64 +4,75 @@ local map = util.map
 local find = util.find
 local is_not_nil = util.is_not_nil
 local to_json = util.to_json
+local round0 = util.round0
+
+local east = defines.direction.east
+local north = defines.direction.north
+local northeast = defines.direction.northeast
+local northwest = defines.direction.northwest
+local south = defines.direction.south
+local southeast = defines.direction.southeast
+local southwest = defines.direction.southwest
+local west = defines.direction.west
 
 local print = nil
 
 local pro_rails = {}
 
+-- necessary s.t. player direction actually changes!
+
+RAIL_CONNECTION_DIRECTIONS = { defines.rail_connection_direction.straight, defines.rail_connection_direction.left, defines.rail_connection_direction.right }
 RAIL_DIRECTIONS = { defines.rail_direction.front, defines.rail_direction.back }
-RAIL_DIRECTIONS = RAIL_DIRECTIONS
 SIMILAR_DIRECTIONS = {
   -- north-ish vectors
-  [defines.direction.north] = {
-    [defines.direction.north] = true,
-    [defines.direction.northeast] = true,
-    [defines.direction.northwest] = true
+  [north] = {
+    [north] = true,
+    [northeast] = true,
+    [northwest] = true
   },
   -- northwest-ish vectors
-  [defines.direction.northwest] = {
-    [defines.direction.northwest] = true,
-    [defines.direction.north] = true,
-    [defines.direction.west] = true
+  [northwest] = {
+    [northwest] = true,
+    [north] = true,
+    [west] = true
   },
   -- west-ish vectors
-  [defines.direction.west] = {
-    [defines.direction.west] = true,
-    [defines.direction.northwest] = true,
-    [defines.direction.southwest] = true
+  [west] = {
+    [west] = true,
+    [northwest] = true,
+    [southwest] = true
   },
   -- southwest-ish vectors
-  [defines.direction.southwest] = {
-    [defines.direction.southwest] = true,
-    [defines.direction.west] = true,
-    [defines.direction.south] = true
+  [southwest] = {
+    [southwest] = true,
+    [west] = true,
+    [south] = true
   },
   -- south-ish vectors
-  [defines.direction.south] = {
-    [defines.direction.south] = true,
-    [defines.direction.southwest] = true,
-    [defines.direction.southeast] = true
+  [south] = {
+    [south] = true,
+    [southwest] = true,
+    [southeast] = true
   },
   -- southeast-ish vectors
-  [defines.direction.southeast] = {
-    [defines.direction.southeast] = true,
-    [defines.direction.east] = true,
-    [defines.direction.south] = true
+  [southeast] = {
+    [southeast] = true,
+    [east] = true,
+    [south] = true
   },
   -- east-ish vectors
-  [defines.direction.east] = {
-    [defines.direction.east] = true,
-    [defines.direction.northeast] = true,
-    [defines.direction.southeast] = true
+  [east] = {
+    [east] = true,
+    [northeast] = true,
+    [southeast] = true
   },
   -- northeast-ish vectors
-  [defines.direction.northeast] = {
-    [defines.direction.northeast] = true,
-    [defines.direction.north] = true,
-    [defines.direction.east] = true
+  [northeast] = {
+    [northeast] = true,
+    [north] = true,
+    [east] = true
   }
 }
-SIMILAR_DIRECTIONS = SIMILAR_DIRECTIONS
 function is_similar_bearing(d1, d2)
   return find(
     function(direction_set)
@@ -71,68 +82,113 @@ function is_similar_bearing(d1, d2)
   )
 end
 
-function get_next_rail_option(rail, rail_direction)
-  local preferred_rail = rail.get_connected_rail({
-    rail_direction = rail_direction,
-    rail_connection_direction = defines.rail_connection_direction.straight
-  })
-  if is_not_nil(preferred_rail) then return preferred_rail end
-  print('get_next_rail_option # unhandled case')
+function get_next_rail_options(rail)
+  local i = 1
+  local rail_options = {}
+  -- loop order _matters_. rail-connection-directions put straight connections
+  -- as priority
+  for _,rail_connection_direction in ipairs(RAIL_CONNECTION_DIRECTIONS) do
+    for __,rail_direction in ipairs(RAIL_DIRECTIONS) do
+      local option = rail.get_connected_rail({
+        rail_direction = rail_direction,
+        rail_connection_direction = rail_connection_direction
+      })
+      if option then
+        -- print('rail option found: [rail_direction] ' .. dir_to_string(rail_direction) .. ' [rail_connection_direction]: ' .. dir_to_string(rail_connection_direction) .. ' (i: ' .. i .. ')')
+        rail_options[i] = option
+        i = i + 1
+      end
+    end
+  end
+  return rail_options
+end
+
+function dir_to_string(dir)
+  if dir == north then return 'north' end
+  if dir == northeast then return 'northeast' end
+  if dir == east then return 'east' end
+  if dir == southeast then return 'southeast' end
+  if dir == south then return 'south' end
+  if dir == southwest then return 'southwest' end
+  if dir == west then return 'west' end
+  if dir == northwest then return 'northwest' end
 end
 
 function get_relative_direction(a, b)
-  local dx = b.x - a.x
-  local dy = b.y - a.y
-  if dx > 0 and dy > 0 then return defines.direction.southeast end
-  if dx > 0 and dy == 0 then return defines.direction.south end
-  if dx < 0 and dy > 0 then return defines.direction.southwest end
-  if dx < 0 and dy == 0 then return defines.direction.west end
-  if dx < 0 and dy < 0 then return defines.direction.northwest end
-  if dx == 0 and dy < 0 then return defines.direction.north end
-  if dx > 0 and dy < 0 then return defines.direction.northeast end
-  return defines.direction.east
+  local dx = round0(b.x - a.x)
+  local dy = round0(b.y - a.y)
+  local rel_dir = nil
+  if dx == 0 and dy < 0 then rel_dir = north end
+  if dx == 0 and dy > 0 then rel_dir = south end
+  if dx > 0 and dy > 0 then rel_dir = southeast end
+  if dx < 0 and dy > 0 then rel_dir = southwest end
+  if dx < 0 and dy == 0 then rel_dir = west end
+  if dx > 0 and dy == 0 then rel_dir = east end
+  if dx < 0 and dy < 0 then rel_dir = northwest end
+  if dx > 0 and dy < 0 then rel_dir = northeast end
+  -- print('{ dir: ' .. dir_to_string(rel_dir) .. ', dx = ' .. dx .. ', dy = ' .. dy .. ' }')
+  return rel_dir
 end
 
-function get_next_rail(rail, player_direction)
-  local next_rail_options = filter(
-    is_not_nil,
-    map(
-      function(dir) return get_next_rail_option(rail, dir) end,
-      RAIL_DIRECTIONS
-    )
-  )
-  local next_rail_options_with_directions_relative_to_player = map(
-    function(rails)
-      local direction = get_relative_direction(rails.current_rail.position, rails.next_rail.position)
-      return { rail = rails.next_rail, direction = direction }
+function is_perpendicular(d1, d2)
+  if (d1 == north or d1 == south) and (d2 == east or d2 == west) then return true end
+  if (d1 == northeast or d1 == southwest) and (d2 == northwest or d2 == southeast) then return true end
+  if (d1 == northwest or d1 == southeast) and (d2 == northeast or d2 == southwest) then return true end
+  if (d1 == east or d1 == west) and (d2 == north or d2 == south) then return true end
+  return false
+end
+
+function get_next_rail(player, rail)
+  local player_direction = player.walking_state.direction
+  -- print('player going: ' .. dir_to_string(player_direction) .. ' and rail going: ' .. dir_to_string(rail.direction))
+  if is_perpendicular(player_direction, rail.direction) then
+    -- print('player is perpendicular to rail')
+    return
+  end
+  local next_rail_options = get_next_rail_options(rail)
+  local next_rail_options_with_directions_relative_to_current_rail = map(
+    function(next_rail)
+      local direction = get_relative_direction(rail.position, next_rail.position)
+      -- if direction then
+      --   print('direction of rail relative: ' .. direction)
+      -- else
+      --   print('direction of rail relative: NO_DIRECTION PROBS SHOULD NEVER HAPPEN!')
+      -- end
+      return { rail = next_rail, direction = direction }
     end,
-    map(
-      function (next_rail) return { next_rail = next_rail, current_rail = rail  } end,
-      next_rail_options
-    )
+    next_rail_options
   )
   -- test for strong match between player travel and rail relativity to player travel
-  local next_rail_with_direction = find(function(rail_with_direction) return rail_with_direction.direction == player_direction end, next_rail_options_with_directions_relative_to_player)
+  local next_rail_with_direction = find(function(rail_with_direction) return rail_with_direction.direction == player_direction end, next_rail_options_with_directions_relative_to_current_rail)
   if next_rail_with_direction == nil then
     -- test for weak match between player travel and rail relativity to player travel
     next_rail_with_direction = find(
       function(rail_with_direction) return is_similar_bearing(player_direction, rail_with_direction.direction) end,
-      next_rail_options_with_directions_relative_to_player
+      next_rail_options_with_directions_relative_to_current_rail
     )
   end
   local next_rail = nil
-  if is_not_nil(next_rail_with_direction) then next_rail = next_rail_with_direction.rail end
-  if next_rail == nil then return nil end
-  if next_rail == previous_next_rail then
-    return nil
+  if is_not_nil(next_rail_with_direction) then
+    next_rail = next_rail_with_direction.rail
+    -- set player walking direction to match rail!
+    player.walking_state.direction = next_rail_with_direction.direction
   end
-  print(to_json(next_rail))
+  if #next_rail_options > 0 and next_rail == nil then
+    -- print('found ' .. #next_rail_options .. ' options')
+  end
   return next_rail
 end
 
 function get_rail_standing_on(player)
-  -- @TODO remove HACKS!
   print = player.print
+  -- print('north: ' .. north)
+  -- print('northeast: ' .. northeast)
+  -- print('east: ' .. east)
+  -- print('southeast: ' .. southeast)
+  -- print('south: ' .. south)
+  -- print('southwest: ' .. southwest)
+  -- print('west: ' .. west)
+  -- print('northwest: ' .. northwest)
   return player.surface.find_entities_filtered({
     type = {'straight-rail', 'curved-rail'},
     position = player.position,
@@ -142,7 +198,7 @@ end
 
 return {
   is_similar_bearing = is_similar_bearing,
-  get_next_rail_option = get_next_rail_option,
+  get_next_rail_options = get_next_rail_options,
   get_relative_direction = get_relative_direction,
   get_next_rail = get_next_rail,
   get_rail_standing_on = get_rail_standing_on

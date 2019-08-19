@@ -62,13 +62,27 @@ local function to_json(obj)
   end
 end
 
+function round(num, numDecimalPlaces)
+  if numDecimalPlaces and numDecimalPlaces>0 then
+    local mult = 10^numDecimalPlaces
+    return math.floor(num * mult + 0.5) / mult
+  end
+  return math.floor(num + 0.5)
+end
+
+function round0(num)
+  return round(num, 0)
+end
+
 return {
   filter = filter,
   find = find,
   is_not_nil = is_not_nil,
   map = map,
   some = some,
-  to_json = to_json
+  to_json = to_json,
+  round = round,
+  round0 = round0
 }
 
 

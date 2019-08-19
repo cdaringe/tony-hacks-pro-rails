@@ -1,30 +1,34 @@
 local pro_rails = require('src/pro_rails')
 
 local is_grinding = true
-local previous_next_rail = nil
+local prev_grinding_player_direction = nil
 
 function maybe_grind(player)
+  -- if we're grinding, disregard keyboard asks--set player direction to face the rail!
+  if is_grinding and prev_grinding_player_direction then
+    player.walking_state.direction = prev_grinding_player_direction
+  end
   local rail_standing_on = pro_rails.get_rail_standing_on(player)
-  if rail_standing_on == nil then return on_ungrind() end
-  local next_rail = pro_rails.get_next_rail(rail_standing_on, player.walking_state.direction)
-  if next_rail == nil then return on_ungrind() end
+  if rail_standing_on == nil then
+    -- player.print('no rail!')
+    return
+  end
+  local next_rail = pro_rails.get_next_rail(player, rail_standing_on)
+  if next_rail == nil then
+    is_grinding = false
+    prev_grinding_player_direction = nil
+    return
+  end
+  is_grinding = true
+  prev_grinding_player_direction = player.walking_state.direction
   player.teleport(next_rail.position)
-  previous_next_rail = next_rail
 end
 
-function on_ungrind()
-  previous_next_rail = nil
-end
 
 function on_player_changed_position(evt)
   local player = game.players[evt.player_index]
-  -- maybe_grind(player)
-  -- player.print('maybe-grind?')
   local status, err = pcall(function () maybe_grind(player) end)
-  -- player.print(status)
   if err then
-    -- player.print('STATUS:')
-    -- player.print(status)
     player.print('ERROR:')
     player.print(err)
   end
