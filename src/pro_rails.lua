@@ -18,8 +18,15 @@ local west = defines.direction.west
 local print = nil
 
 local pro_rails = {}
-
--- necessary s.t. player direction actually changes!
+local GRIND_SPEED = 10
+local globals = {
+  position_last_pos_x = nil,
+  position_last_pos_y = nil,
+  is_grinding = false,
+  frames_since_grinding = 0,
+  is_init = false,
+  is_skateboarding_researched = false
+}
 
 RAIL_CONNECTION_DIRECTIONS = { defines.rail_connection_direction.straight, defines.rail_connection_direction.left, defines.rail_connection_direction.right }
 RAIL_DIRECTIONS = { defines.rail_direction.front, defines.rail_direction.back }
@@ -73,6 +80,16 @@ SIMILAR_DIRECTIONS = {
     [east] = true
   }
 }
+
+function init(game)
+  for _, force in pairs(game.forces) do
+    if force.technologies["skateboarding"].researched then
+      globals.is_skateboarding_researched = true
+    end
+  end
+  globals.is_init = true
+end
+
 function is_similar_bearing(d1, d2)
   return find(
     function(direction_set)
@@ -180,7 +197,6 @@ function get_next_rail(player, rail)
 end
 
 function get_rail_standing_on(player)
-  print = player.print
   -- print('north: ' .. north)
   -- print('northeast: ' .. northeast)
   -- print('east: ' .. east)
@@ -192,14 +208,78 @@ function get_rail_standing_on(player)
   return player.surface.find_entities_filtered({
     type = {'straight-rail', 'curved-rail'},
     position = player.position,
-    radius = 1
+    radius = 2
   })[1]
 end
 
+function maybe_grind(player)
+  if globals.is_skateboarding_researched ~= true then return end
+  print = player.print
+  local rail_standing_on = get_rail_standing_on(player)
+  if rail_standing_on == nil then return end
+  if is_perpendicular(player.walking_state.direction, rail_standing_on.direction) then return end
+  -- local next_rail = pro_rails.get_next_rail(player, rail_standing_on)
+  local loco = game.surfaces.nauvis.create_entity({
+    name = 'skatetrain',
+    position = rail_standing_on.position,
+    direction = player.walking_state.direction,
+    amount = 1,
+    force = player.force,
+    player = player
+  })
+  if loco == nil then return end
+  loco.train.speed = GRIND_SPEED
+  loco.set_driver(player)
+  globals.is_grinding = true
+  globals.locomotive = loco
+  globals.player = player
+  player.play_sound{path = 'ollie'}
+end
+
+function on_grind_end()
+  globals.position_last_pos_x = nil
+  globals.position_last_pos_y = nil
+  globals.locomotive.destroy()
+  globals.is_grinding = false
+  globals.frames_since_grinding = 0
+end
+
+function on_tick(evt)
+  if globals.is_skateboarding_researched ~= true then return end
+  if globals.is_grinding == false then return end
+  if globals.frames_since_grinding < 45 then globals.frames_since_grinding = globals.frames_since_grinding + 1 end
+  if globals.frames_since_grinding == 45 then
+    globals.frames_since_grinding = globals.frames_since_grinding + 1
+    globals.player.play_sound{path = '5050'}
+  else
+    if evt.tick % 60 == 0 then globals.player.play_sound{path = '5050'} end
+  end
+  globals.locomotive.train.speed = GRIND_SPEED
+  local player = globals.player
+  if globals.position_last_pos_x ~= player.position.x or globals.position_last_pos_y ~= player.position.y then
+    -- still grinding, bro
+    globals.position_last_pos_x = player.position.x
+    globals.position_last_pos_y = player.position.y
+    return
+  end
+  on_grind_end()
+end
+
+function on_research_finished(research)
+  if research.name == 'skateboarding' then
+    globals.is_skateboarding_researched = true
+  end
+end
+
 return {
-  is_similar_bearing = is_similar_bearing,
-  get_next_rail_options = get_next_rail_options,
-  get_relative_direction = get_relative_direction,
   get_next_rail = get_next_rail,
-  get_rail_standing_on = get_rail_standing_on
+  get_next_rail_options = get_next_rail_options,
+  get_rail_standing_on = get_rail_standing_on,
+  get_relative_direction = get_relative_direction,
+  globals = globals,
+  init = init,
+  is_similar_bearing = is_similar_bearing,
+  maybe_grind = maybe_grind,
+  on_research_finished = on_research_finished,
+  on_tick = on_tick
 }

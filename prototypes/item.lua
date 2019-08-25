@@ -4,7 +4,6 @@ data:extend({
     name = "skateboard",
     icon = "__THPR__/graphics/icon/skateboard_large.png",
     icon_size = 850,
-    -- flags = {"goes-to-main-inventory"},
     subgroup = "gun",
     order = "-a[military]",
     attack_parameters =
@@ -30,20 +29,6 @@ data:extend({
     ammo_type =
     {
       category = "skate-ammo",
-      -- action =
-      -- {
-          -- type = "direct",
-          -- repeat_count = 10,
-          -- action_delivery =
-          -- {
-            -- type = "projectile",
-            -- projectile = "Laser-Gun-Bullet",
-          --   starting_speed = 2,
-          --   direction_deviation = 0,
-          --   range_deviation = 0,
-          --   max_range = 40
-          -- }
-        -- }
     },
     magazine_size = 25,
     subgroup = "ammo",
