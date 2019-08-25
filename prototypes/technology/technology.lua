@@ -2,7 +2,7 @@ data:extend({
   {
     type = "technology",
     name = "skateboarding",
-    icon = "__THPR__/graphics/icon/skateboard_large.png",
+    icon = "__tony_hacks_pro_rails__/graphics/icon/skateboard_large.png",
     icon_size = 850,
     prerequisites={},
     effects = {

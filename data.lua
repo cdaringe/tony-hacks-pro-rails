@@ -5,7 +5,7 @@ require('prototypes.technology.technology')
 require('prototypes.recipe.recipe')
 require('prototypes.ammo-category')
 
-local m = '__THPR__'
+local m = '__tony_hacks_pro_rails__'
 
 local skatetrain = table.deepcopy(data.raw.locomotive.locomotive)
 skatetrain.name = 'skatetrain'

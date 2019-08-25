@@ -2,7 +2,7 @@ data:extend({
   {
     type = "gun",
     name = "skateboard",
-    icon = "__THPR__/graphics/icon/skateboard_large.png",
+    icon = "__tony_hacks_pro_rails__/graphics/icon/skateboard_large.png",
     icon_size = 850,
     subgroup = "gun",
     order = "-a[military]",
@@ -23,7 +23,7 @@ data:extend({
   {
     type = "ammo",
     name = "skateboard-wheel",
-    icon = "__THPR__/graphics/icon/wheel_small.png",
+    icon = "__tony_hacks_pro_rails__/graphics/icon/wheel_small.png",
     icon_size = 128,
     -- flags = {"goes-to-main-inventory"},
     ammo_type =
