@@ -1,6 +1,6 @@
 {
   "name": "tony-hacks-pro-rails",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
@@ -15,7 +15,7 @@
     "deploy": "rm -rf ~/Library/Application\\ Support/factorio/mods/tony_hacks_pro_rails* && export VERSION=$(cat info.json | jq -r .version) && cp build/tony_hacks_pro_rails_$VERSION.zip ~/Library/Application\\ Support/factorio/mods/",
     "prebuild": "rm -rf build && export VERSION=$(cat info.json | jq -r .version) && mkdir -p build/tony_hacks_pro_rails_$VERSION",
     "prerelease": "rm -rf build && mkdir build",
-    "release": "VERSION=$(cat package.json | jq -r .version) && RELEASE=tony_hacks_pro_rails_$VERSION && rm -rf $RELEASE && mkdir -p $RELEASE && cp control.lua info.json $RELEASE && rm -rf build && mkdir -p build && zip -r build/$RELEASE.zip $RELEASE && rm -rf $RELEASE",
+    "release": "VERSION=$(cat package.json | jq -r .version) && RELEASE=tony_hacks_pro_rails_$VERSION && rm -rf $RELEASE && mkdir -p $RELEASE && cp -r *.lua info.json thumbnail.png prototypes sounds src locale graphics $RELEASE && rm -rf build && mkdir -p build && zip -r build/$RELEASE.zip $RELEASE && rm -rf $RELEASE",
     "test": "lua test/util.test.lua",
     "watch": "chokidar '**/*.lua' '**/*.json' -c 'npm run copy'"
   },

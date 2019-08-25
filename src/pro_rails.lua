@@ -23,7 +23,6 @@ local globals = {
   position_last_pos_x = nil,
   position_last_pos_y = nil,
   is_grinding = false,
-  frames_since_grinding = 0,
   is_init = false,
   is_skateboarding_researched = false
 }
@@ -247,13 +246,7 @@ end
 function on_tick(evt)
   if globals.is_skateboarding_researched ~= true then return end
   if globals.is_grinding == false then return end
-  if globals.frames_since_grinding < 45 then globals.frames_since_grinding = globals.frames_since_grinding + 1 end
-  if globals.frames_since_grinding == 45 then
-    globals.frames_since_grinding = globals.frames_since_grinding + 1
-    globals.player.play_sound{path = '5050'}
-  else
-    if evt.tick % 60 == 0 then globals.player.play_sound{path = '5050'} end
-  end
+  if evt.tick % 60 == 0 then globals.player.play_sound{path = '5050'} end
   globals.locomotive.train.speed = GRIND_SPEED
   local player = globals.player
   if globals.position_last_pos_x ~= player.position.x or globals.position_last_pos_y ~= player.position.y then
