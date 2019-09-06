@@ -1,6 +1,8 @@
 # tony-hacks-pro-rails
 
-grind rails to get around in factorio ⚙️
+grind rails to get around in factorio ⚙️.  includes great sound effects!
+
+<img src="./vid/demo.mov.gif" width=250 />
 
 ## usage
 

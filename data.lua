@@ -1,9 +1,9 @@
 -- require('prototypes.entity.projectiles');
-require('prototypes.item')
+-- require('prototypes.item')
+-- require('prototypes.recipe.recipe')
+-- require('prototypes.ammo-category')
 require('prototypes.sounds')
 require('prototypes.technology.technology')
-require('prototypes.recipe.recipe')
-require('prototypes.ammo-category')
 
 local m = '__tony_hacks_pro_rails__'
 

@@ -258,8 +258,8 @@ function on_tick(evt)
   on_grind_end()
 end
 
-function on_research_finished(research)
-  if research.name == 'skateboarding' then
+function on_research_finished(evt)
+  if evt.research.name == 'skateboarding' then
     globals.is_skateboarding_researched = true
   end
 end
