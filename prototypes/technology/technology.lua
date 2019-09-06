@@ -1,12 +1,3 @@
--- {
---   type = "unlock-recipe",
---   recipe = "skateboard"
--- },
--- {
---   type = "unlock-recipe",
---   recipe = "skateboard-wheel"
--- }
-
 data:extend({
   {
     type = "technology",
@@ -21,7 +12,7 @@ data:extend({
         {"automation-science-pack", 1},
         {"logistic-science-pack", 1},
       },
-      time = 1
+      time = 10
     },
     order = "c-a"
   }
